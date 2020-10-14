@@ -33,8 +33,6 @@ export const minStagesData = (stages) => stages.map((stage) => ({
 export const compare = (arr1, arr2) => {
   const d1 = minStagesData(arr1);
   const d2 = minStagesData(arr2);
-  console.log('d1', d1);
-  console.log('d2', d2);
   const resArr = [];
   for (let i = 0; i < d1.length; i += 1) {
     resArr.push(_.isEqual(d1[i], d2[i]));

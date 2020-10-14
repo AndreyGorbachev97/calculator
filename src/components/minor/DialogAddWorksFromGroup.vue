@@ -35,7 +35,7 @@
           <v-list class="card-text">
             <v-list-item-group color="primary">
               <v-list-item
-                v-for="(item, i) in NIR_GROUP_LABOR_LIST"
+                v-for="(item, i) in laborList"
                 :key="i"
               >
                 <v-list-item-content style="padding: 0">
@@ -46,7 +46,7 @@
                       class="ml-2 mr-2"
                       dense
                     ></v-checkbox>
-                    {{ item.name }}
+                    {{ item.laborName }}
                   </div>
                 </v-list-item-content>
               </v-list-item>
@@ -66,7 +66,7 @@
           <v-btn
             color="primary"
             text
-            @click="dialog = false"
+            @click="cancel"
           >
             Отмена
           </v-btn>
@@ -88,6 +88,8 @@ export default {
     return {
       dialog: false,
       items: [],
+      software: {},
+      laborList: [],
     };
   },
   props: {
@@ -99,37 +101,43 @@ export default {
     titleCard: String,
     addList: Function,
   },
-  computed: {
-    ...mapGetters(['NIR_GROUP_LABOR_LIST', 'SOFTWARE_LIST']),
+  watch: {
     software() {
-      return this.SOFTWARE_LIST[0];
+      this.changeSoftware(this.software.id);
     },
+  },
+  computed: {
+    ...mapGetters(['NIR_GROUP_LABOR_LIST', 'SOFTWARE_LIST', 'SOFTWARE_LABOR_LIST']),
     checkboxes() {
-      console.log(this.NIR_GROUP_LABOR_LIST);
-      return this.NIR_GROUP_LABOR_LIST
+      return this.laborList
         .map((el) => this.listSelected.find((selected) => selected.id === el.id));
     },
   },
   methods: {
-    ...mapActions(['GET_NIR_GROUP_LABOR_LIST', 'GET_SOFTWARE_LIST']),
+    ...mapActions(['GET_NIR_GROUP_LABOR_LIST', 'GET_SOFTWARE_LIST', 'GET_SOFTWARE_LABOR_LIST']),
+    async changeSoftware(id) {
+      await this.GET_SOFTWARE_LABOR_LIST(id);
+      this.laborList = this.SOFTWARE_LABOR_LIST;
+    },
     async getSoftwareList() {
       await this.GET_SOFTWARE_LIST();
       const temp = this.SOFTWARE_LIST[0];
       this.software = temp;
+      console.log(this.software);
+      await this.GET_SOFTWARE_LABOR_LIST(this.software.id);
+      console.log(this.SOFTWARE_LABOR_LIST);
+      this.laborList = this.SOFTWARE_LABOR_LIST;
     },
     saveList() {
-      if (this.groupIndex === undefined) {
-        this.addList(this.stageIndex, this.listSelected.map((el) => ({
-          ...el,
-          stageIndex: this.stageIndex,
-        })));
-      } else {
-        this.addList(this.stageIndex, this.groupIndex, this.listSelected.map((el) => ({
-          ...el,
-          stageIndex: this.stageIndex,
-        })));
-      }
+      this.addList(this.stageIndex, this.groupIndex, this.listSelected.map((el) => ({
+        ...el,
+        stageIndex: this.stageIndex,
+      })));
       this.dialog = false;
+    },
+    cancel() {
+      this.dialog = false;
+      this.listSelected = [];
     },
     showList() {
       this.GET_NIR_GROUP_LABOR_LIST();

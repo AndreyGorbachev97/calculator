@@ -218,6 +218,7 @@
                         :stageIndex="i"
                         :groupIndex="j"
                         titleCard="Список работ"
+                        :addList="addListLaborToGroup"
                       />
                       <v-btn @click.stop="" class="ma-2" icon x-small color="error">
                         <v-icon>mdi-delete-outline</v-icon>
@@ -435,7 +436,8 @@ export default {
       }));
     },
     addListLaborToGroup(indexStage, indexGroup, list) {
-      this.stages[indexStage].groups[indexGroup].list = list;
+      console.log('list', list);
+      this.data.nir.stages[indexStage].groups[indexGroup].listLabor = list;
     },
     deleteStage(id) {
       this.data.nir.stages.pop();
