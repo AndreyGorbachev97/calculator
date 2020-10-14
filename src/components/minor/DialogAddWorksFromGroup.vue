@@ -4,7 +4,7 @@
       x-small
       color="primary"
       icon
-      @click.stop="showList()"
+      @click.stop="openDialog()"
     >
       <v-icon>
         mdi-plus-circle-outline
@@ -14,44 +14,63 @@
     <v-dialog
       persistent
       v-model="dialog"
-      max-width="800"
+      max-width="900"
     >
       <v-card>
-        <v-card-title>{{titleCard}}</v-card-title>
+        <v-card-title>
+          <v-row>
+            <v-col cols="6" class="control-block">
+              {{titleCard}}
+            </v-col>
+            <v-col cols="3">
+              <v-text-field
+                hide-details
+                rounded
+                dense
+                label="Поиск"
+                filled
+                v-model="search"
+                append-icon="mdi-magnify"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-select
+                hide-details
+                rounded
+                dense
+                filled
+                v-model="itemsPerPage"
+                :items="[5, 10, 25]"
+                label="Строк на странице"
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-title>
         <v-card-text>
-          <v-select
-            v-model="software"
-            :items="SOFTWARE_LIST"
-            rounded
-            dense
-            filled
-            item-text="name"
-            item-value="abbr"
-            label="Select"
-            persistent-hint
-            return-object
-            single-line
-          />
-          <v-list class="card-text">
-            <v-list-item-group color="primary">
-              <v-list-item
-                v-for="(item, i) in laborList"
-                :key="i"
+          <v-data-table
+            class="data-table"
+            v-model="localListSelected"
+            :headers="headers"
+            :items="laborList"
+            :page.sync="page"
+            @page-count="pageCount = $event"
+            :items-per-page="itemsPerPage"
+            :search="search"
+            hide-default-footer
+            item-key="id"
+            show-select
+          >
+            <template v-slot:item.devEnvName="{ item }">
+              <v-chip
+                small
+                :color="chipСolor[item.devEnvID]"
+                dark
               >
-                <v-list-item-content style="padding: 0">
-                  <div style="display: flex; align-items: center">
-                    <v-checkbox
-                      v-model="checkboxes[i]"
-                      @click="modList(item)"
-                      class="ml-2 mr-2"
-                      dense
-                    ></v-checkbox>
-                    {{ item.laborName }}
-                  </div>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list-item-group>
-          </v-list>
+                {{ item.devEnvName }}
+              </v-chip>
+            </template>
+          </v-data-table>
+          <pagination class="mt-2" :change="changePage" :size="pageCount" :page="page - 1"/>
         </v-card-text>
 
         <v-card-actions>
@@ -78,6 +97,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import Pagination from './Pagination.vue';
 
 export default {
   name: 'DialogAddWorksGroup',
@@ -86,14 +106,37 @@ export default {
   },
   data() {
     return {
+      search: '',
+      page: 1,
+      pageCount: 0,
+      itemsPerPage: 10,
       dialog: false,
       items: [],
       software: {},
       laborList: [],
+      localListSelected: this.listSelected,
+      chipСolor: {
+        1: 'error',
+        2: 'primary',
+        3: 'success',
+        4: 'warning',
+      },
+      headers: [
+        {
+          text: 'Название',
+          align: 'start',
+          value: 'laborName',
+        },
+        {
+          text: 'Язык',
+          align: 'start',
+          value: 'devEnvName',
+          width: '35%',
+        },
+      ],
     };
   },
   props: {
-    fullList: Array,
     listSelected: Array,
     groupIndex: Number,
     stageIndex: Number,
@@ -101,35 +144,31 @@ export default {
     titleCard: String,
     addList: Function,
   },
-  watch: {
-    software() {
-      this.changeSoftware(this.software.id);
-    },
+  components: {
+    Pagination,
   },
   computed: {
     ...mapGetters(['NIR_GROUP_LABOR_LIST', 'SOFTWARE_LIST', 'SOFTWARE_LABOR_LIST']),
-    checkboxes() {
-      return this.laborList
-        .map((el) => this.listSelected.find((selected) => selected.id === el.id));
-    },
   },
   methods: {
     ...mapActions(['GET_NIR_GROUP_LABOR_LIST', 'GET_SOFTWARE_LIST', 'GET_SOFTWARE_LABOR_LIST']),
-    async changeSoftware(id) {
-      await this.GET_SOFTWARE_LABOR_LIST(id);
-      this.laborList = this.SOFTWARE_LABOR_LIST;
+    filterLabor(id) {
+      return this.laborList.filter((labor) => labor.devEnvID === id);
+    },
+    changePage(newPage) {
+      if (newPage >= 0 && newPage <= this.pageCount - 1) {
+        this.page = newPage + 1;
+      }
     },
     async getSoftwareList() {
       await this.GET_SOFTWARE_LIST();
       const temp = this.SOFTWARE_LIST[0];
       this.software = temp;
-      console.log(this.software);
-      await this.GET_SOFTWARE_LABOR_LIST(this.software.id);
-      console.log(this.SOFTWARE_LABOR_LIST);
+      await this.GET_SOFTWARE_LABOR_LIST();
       this.laborList = this.SOFTWARE_LABOR_LIST;
     },
     saveList() {
-      this.addList(this.stageIndex, this.groupIndex, this.listSelected.map((el) => ({
+      this.addList(this.stageIndex, this.groupIndex, this.localListSelected.map((el) => ({
         ...el,
         stageIndex: this.stageIndex,
       })));
@@ -137,27 +176,23 @@ export default {
     },
     cancel() {
       this.dialog = false;
-      this.listSelected = [];
+      this.localListSelected = [];
     },
-    showList() {
-      this.GET_NIR_GROUP_LABOR_LIST();
+    openDialog() {
+      this.localListSelected = this.listSelected;
       this.dialog = true;
-    },
-    modList(item) {
-      const index = this.listSelected.findIndex((el) => el.id === item.id);
-      if (index >= 0) {
-        this.listSelected.splice(index, 1);
-      } else {
-        this.listSelected.push(item);
-      }
     },
   },
 };
 </script>
 
 <style scoped>
-  .card-text  {
-    max-height: 55vh;
-    overflow-y: auto;
-  }
+.data-table  {
+  max-height: 52vh;
+  overflow-y: auto;
+}
+.control-block {
+  display: flex;
+  align-items: center;
+}
 </style>

@@ -4,7 +4,7 @@
       x-small
       color="primary"
       outlined
-      @click.stop="dialog = true"
+      @click.stop="openDialog"
     >
       {{title}}
     </v-btn>
@@ -12,33 +12,53 @@
     <v-dialog
       persistent
       v-model="dialog"
-      max-width="800"
+      max-width="900"
     >
       <v-card>
-        <v-card-title>{{titleCard}}</v-card-title>
-        <v-card-text class="card-text">
-          <v-list nav>
-            <v-list-item-group color="primary">
-              <v-list-item
-                v-for="(item, i) in fullList"
-                :key="i"
-              >
-                <v-list-item-content
-                  style="padding: 0"
-                >
-                  <div style="display: flex; align-items: center">
-                    <v-checkbox
-                      v-model="checkboxes[i]"
-                      @click="modList(item)"
-                      class="ml-2 mr-2"
-                      dense
-                    ></v-checkbox>
-                    {{ item.name }}
-                  </div>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list-item-group>
-          </v-list>
+        <v-card-title>
+          <v-row>
+            <v-col cols="6" class="control-block">
+              {{titleCard}}
+            </v-col>
+            <v-col cols="3">
+              <v-text-field
+                hide-details
+                rounded
+                dense
+                label="Поиск"
+                filled
+                v-model="search"
+                append-icon="mdi-magnify"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-select
+                hide-details
+                rounded
+                dense
+                filled
+                v-model="itemsPerPage"
+                :items="[5, 10, 25]"
+                label="Строк на странице"
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-title>
+        <v-card-text>
+          <v-data-table
+            class="data-table"
+            v-model="localListSelected"
+            :headers="headers"
+            :items="fullList"
+            :page.sync="page"
+            @page-count="pageCount = $event"
+            :items-per-page="itemsPerPage"
+            :search="search"
+            hide-default-footer
+            item-key="name"
+            show-select
+          />
+          <pagination class="mt-2" :change="changePage" :size="pageCount" :page="page - 1"/>
         </v-card-text>
 
         <v-card-actions>
@@ -53,7 +73,7 @@
           <v-btn
             color="primary"
             text
-            @click="dialog = false"
+            @click="cancel"
           >
             Отмена
           </v-btn>
@@ -64,68 +84,80 @@
 </template>
 
 <script>
+import Pagination from './Pagination.vue';
+
 export default {
   name: 'DialogForAddingNir',
   data() {
     return {
+      search: '',
+      page: 1,
+      pageCount: 0,
+      itemsPerPage: 10,
       dialog: false,
-      list: [],
+      localListSelected: this.listSelected,
+      headers: [
+        {
+          text: 'Название',
+          align: 'start',
+          value: 'name',
+        },
+      ],
     };
+  },
+  components: {
+    Pagination,
   },
   props: {
     fullList: Array,
     listSelected: Array,
-    groupIndex: Number,
+    initialListSelected: Array,
     stageIndex: Number,
     title: String,
     addList: Function,
     titleCard: String,
   },
-  computed: {
-    checkboxes() {
-      return this.fullList
-        .map((el) => this.listSelected.find((selected) => selected.labor.id === el.id));
-    },
-  },
   methods: {
-    saveList() {
-      if (this.groupIndex === undefined) {
-        this.addList(this.stageIndex, this.listSelected);
-      } else {
-        this.addList(this.stageIndex, this.groupIndex, this.listSelected.map((el) => ({
-          ...el,
-          stageIndex: this.stageIndex,
-        })));
+    openDialog() {
+      this.localListSelected = this.listSelected;
+      this.dialog = true;
+    },
+    changePage(newPage) {
+      if (newPage >= 0 && newPage <= this.pageCount - 1) {
+        this.page = newPage + 1;
       }
+    },
+    saveList() {
+      const modList = this.localListSelected.map((el) => ({
+        volume: el.volume,
+        labor: {
+          id: el.id,
+          name: el.name,
+          code: el.code,
+          maxVolume: el.maxVolume,
+          minVolume: el.minVolume,
+          overMax: el.overMax,
+          step: el.step,
+        },
+      }));
+      this.addList(this.stageIndex, modList);
       this.dialog = false;
     },
-    modList(item) {
-      const index = this.listSelected.findIndex((el) => el.labor.id === item.id);
-      if (index >= 0) {
-        this.listSelected.splice(index, 1);
-      } else {
-        const modItem = {
-          volume: item.volume,
-          labor: {
-            id: item.id,
-            name: item.name,
-            code: item.code,
-            maxVolume: item.maxVolume,
-            minVolume: item.minVolume,
-            overMax: item.overMax,
-            step: item.step,
-          },
-        };
-        this.listSelected.push(modItem);
-      }
+    cancel() {
+      this.localListSelected = this.listSelected;
+      this.dialog = false;
     },
   },
 };
 </script>
 
 <style scoped>
-.card-text  {
-  max-height: 72vh;
+.data-table  {
+  max-height: 52vh;
   overflow-y: auto;
+}
+.control-block {
+  display: flex;
+  align-items: center;
 }
 </style>

@@ -78,7 +78,8 @@
               class="ml-2 mb-3"
               title="добавить работы"
               :fullList="listLabor"
-              :listSelected="[...item.laborVolumes]"
+              :listSelected="modListSelected([...item.laborVolumes])"
+              :initialListSelected="modListSelected([...item.laborVolumes])"
               :stageIndex="i"
               titleCard="Список работ"
               :addList="addListLabor"
@@ -170,7 +171,12 @@
                             </div>
                           </td>
                           <td>
-                            <v-btn @click="deleteElementList(i, el.id)" icon x-small color="error">
+                            <v-btn
+                              @click="deleteElementList(i, el.labor.id)"
+                              icon
+                              x-small
+                              color="error"
+                            >
                               <v-icon>mdi-delete-outline</v-icon>
                             </v-btn>
                           </td>
@@ -363,6 +369,12 @@ export default {
     },
   },
   methods: {
+    modListSelected(list) {
+      return list.map((el) => ({
+        volume: el.volume,
+        ...el.labor,
+      }));
+    },
     changeDateFrom(data) {
       this.data.nir.stages[data.stageIndex].dateFrom = data.date;
       this.modifiedDate = data.date;
@@ -447,10 +459,12 @@ export default {
       this.stages[indexStage].groups = this.stages[indexStage].groups
         .filter((el) => el.id !== idGroup);
     },
-    deleteElementList(stageId, elementId) {
-      const index = this.data.nir.stages[stageId].laborVolumes
-        .findIndex((el) => el.id === elementId);
-      this.data.nir.stages[stageId].laborVolumes.splice(index, 1);
+    deleteElementList(stageIndex, elementId) {
+      console.log(elementId);
+      const index = this.data.nir.stages[stageIndex].laborVolumes
+        .findIndex((el) => el.labor.id === elementId);
+      console.log(index);
+      this.data.nir.stages[stageIndex].laborVolumes.splice(index, 1);
     },
   },
 };

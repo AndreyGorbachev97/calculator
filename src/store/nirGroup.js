@@ -57,8 +57,8 @@ export default {
           console.log(e);
         });
     },
-    GET_SOFTWARE_LABOR_LIST: async (context, id) => {
-      await axios.get(`${HOST}/SoftwareDevLaborVolumeRange/GetByDevEnv?devEnvId=${id}`)
+    GET_SOFTWARE_LABOR_LIST: async (context) => {
+      await axios.get(`${HOST}/SoftwareDevLaborVolumeRange`)
         .then((res) => {
           context.commit('SET_SOFTWARE_LABOR_LIST', res.data);
         })
