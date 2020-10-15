@@ -16,7 +16,7 @@
             style="position: relative; display: flex; justify-content: space-between"
           >
             <v-row>
-              <v-col style="display: flex; align-items: center" cols="8">
+              <v-col style="display: flex; align-items: center" cols="7">
                 <div class="text-medium">Этап {{i + 1}}</div>
                   <v-tooltip top>
                     <template v-slot:activator="{ on, attrs }">
@@ -53,12 +53,12 @@
                   />
                 </div>
               </v-col>
-              <v-col cols="4" style="display: flex; align-items: center; justify-content: flex-end">
+              <v-col cols="5" style="display: flex; align-items: center; justify-content: flex-end">
                 <v-chip class="text-medium" outlined color="success">
                   <v-avatar left>
                     <v-icon>mdi-cash-multiple</v-icon>
                   </v-avatar>
-                  {{`${(sumLabor[i]).toFixed(3)} x
+                  {{`( ${(sumStageLabor[i].sumLabor).toFixed(3)} + ${sumGroup[i].toFixed(3)} ) x
                   ${item.nirInnovationRateValue}
                   = ${(volumeLaborStages[i]).toFixed(3)}`}}
                 </v-chip>
@@ -95,7 +95,9 @@
                 <v-expansion-panel>
                   <v-expansion-panel-header >
                     <div class="text-medium" style="display: flex; align-items: center">
-                      Коффициент новизны:
+                      <div class="text-medium" style="width: 70%">
+                        Коффициент новизны
+                      </div>
                       <v-icon
                         v-if="!item.nirInnovationRateValue"
                         class="ml-2"
@@ -119,15 +121,19 @@
                 <v-expansion-panel>
                   <v-expansion-panel-header >
                     <div class="text-medium" style="display: flex; align-items: center">
-                      Объем работ:
+                      <div class="text-medium" style="width: 70%">
+                        Объем работ
+                      </div>
                       <v-icon
-                        v-if="!sumLabor[i]"
+                        v-if="!sumStageLabor[i].sumLabor"
                         class="ml-2"
                         color="warning"
                       >
                         mdi-alert-circle
                       </v-icon>
-                      <div v-else class="text-medium ml-2">{{sumLabor[i].toFixed(3)}}</div>
+                      <div v-else class="text-medium ml-2">
+                        {{sumStageLabor[i].sumLabor.toFixed(3)}}
+                      </div>
                     </div>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
@@ -207,7 +213,7 @@
                 <v-expansion-panel v-for="(group, j) in item.groups" :key="j">
                   <v-expansion-panel-header >
                     <div style="display: flex; align-items: center">
-                      <div class="text-medium" style="max-width: 70%">
+                      <div class="text-medium" style="width: 70%">
                         {{group.name}}
                       </div>
                       <v-icon
@@ -217,7 +223,9 @@
                       >
                         mdi-alert-circle
                       </v-icon>
-                      <div v-else class="text-medium ml-2">{{item.nirInnovationRateValue}}</div>
+                      <div v-else class="text-medium ml-2">
+                        {{sumStageLabor[i].sumGroupLabor[j].toFixed(3)}}
+                      </div>
                       <v-spacer />
                       <dialog-add-works-from-group
                         :listSelected="group.listLabor"
@@ -242,27 +250,27 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="(el, j) in item.laborVolumes ? item.laborVolumes : []" :key="j">
-                          <td >{{ el.labor.name }}</td>
+                        <tr v-for="(el, j) in group.listLabor" :key="j">
+                          <td >{{ el.laborName }}</td>
                           <td>
                             <div style="display: flex; align-items: center">
                               <v-slider
                                 style="width: 80%"
-                                :step="el.labor.step"
+                                :step="el.step"
                                 tick-size="3"
                                 ticks="always"
-                                :min="el.labor.minVolume"
-                                :max="el.labor.overMax"
+                                :min="el.minVolume"
+                                :max="el.overMax"
                                 :color="colorSlider(
-                                  el.labor.maxVolume,
-                                  item.laborVolumes[j].volume,
+                                  el.maxVolume,
+                                  el.volume,
                                 )"
                                 track-color="grey"
                                 dense
                                 single-line
                                 hide-details
                                 thumb-label
-                                v-model="item.laborVolumes[j].volume"
+                                v-model="el.volume"
                               >
                                 <template v-slot:thumb-label="{ value }">
                                   {{ value.toFixed(3) }}
@@ -352,14 +360,22 @@ export default {
     sortListLabor() {
       return sortListInnovationRate(this.data.listNirInnovationRate);
     },
-    sumLabor() {
+    sumStageLabor() {
       return this.data.nir.stages
-        .map((stage) => stage.laborVolumes.reduce((acc, el) => acc + el.volume, 0));
+        .map((stage) => ({
+          sumLabor: stage.laborVolumes.reduce((acc, el) => acc + el.volume, 0),
+          sumGroupLabor: stage.groups
+            .map((group) => group.listLabor.reduce((acc, el) => acc + el.volume, 0)),
+        }));
+    },
+    sumGroup() {
+      return this.sumStageLabor.map((group) => group.sumGroupLabor
+        .reduce((acc, el) => acc + el, 0));
     },
     volumeLaborStages() {
       return this.data.nir.stages.map((stage, i) => {
         if (stage.nirInnovationRateValue) {
-          return stage.nirInnovationRateValue * this.sumLabor[i];
+          return stage.nirInnovationRateValue * (this.sumStageLabor[i].sumLabor + this.sumGroup[i]);
         }
         return 0;
       });
@@ -442,13 +458,9 @@ export default {
       this.data.nir.stages[index].laborVolumes = list;
     },
     addListGroup(index, groups) {
-      this.data.nir.stages[index].groups = groups.map((el) => ({
-        ...el,
-        listLabor: [],
-      }));
+      this.data.nir.stages[index].groups = groups;
     },
     addListLaborToGroup(indexStage, indexGroup, list) {
-      console.log('list', list);
       this.data.nir.stages[indexStage].groups[indexGroup].listLabor = list;
     },
     deleteStage(id) {

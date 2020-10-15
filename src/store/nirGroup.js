@@ -26,7 +26,12 @@ export default {
       state.softwareList = list;
     },
     SET_SOFTWARE_LABOR_LIST: (state, list) => {
-      state.softwareLaborList = list;
+      state.softwareLaborList = list.map((el) => ({
+        ...el,
+        step: (el.maxVolume - el.minVolume) / 10,
+        volume: el.maxVolume - (((el.maxVolume - el.minVolume) / 10) * 2),
+        overMax: el.maxVolume + (((el.maxVolume - el.minVolume) / 10) * 3),
+      }));
     },
   },
   actions: {

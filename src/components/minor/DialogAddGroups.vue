@@ -133,10 +133,15 @@ export default {
       }
     },
     saveList() {
-      this.addList(this.stageIndex, this.localListSelected.map((el) => ({
-        ...el,
-        stageIndex: this.stageIndex,
-      })));
+      const list = this.localListSelected.reduce((acc, el) => {
+        if (this.listSelected.find((l) => l.id === el.id)) {
+          acc.push(this.listSelected.find((l) => l.id === el.id));
+        } else {
+          acc.push({ ...el, listLabor: [] });
+        }
+        return acc;
+      }, []);
+      this.addList(this.stageIndex, list);
       this.dialog = false;
     },
     modList(item) {
