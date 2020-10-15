@@ -2,7 +2,6 @@
   <div>
     <v-btn
       x-small
-      class="ml-2 mb-1"
       color="primary"
       outlined
       @click.stop="openDialog"

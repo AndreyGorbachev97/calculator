@@ -74,16 +74,27 @@
             </v-row>
           </v-card-title>
           <v-card-text>
-            <dialog-add-works
-              class="ml-2 mb-3"
-              title="добавить работы"
-              :fullList="listLabor"
-              :listSelected="modListSelected([...item.laborVolumes])"
-              :initialListSelected="modListSelected([...item.laborVolumes])"
-              :stageIndex="i"
-              titleCard="Список работ"
-              :addList="addListLabor"
-            />
+            <div style="display: flex">
+              <dialog-add-works
+                class="ml-2 mb-3"
+                title="добавить работы"
+                :fullList="listLabor"
+                :listSelected="modListSelected([...item.laborVolumes])"
+                :initialListSelected="modListSelected([...item.laborVolumes])"
+                :stageIndex="i"
+                titleCard="Список работ"
+                :addList="addListLabor"
+              />
+              <dialog-add-groups
+                class="ml-2 mb-3"
+                title="добавить группы работ"
+                :fullList="listGroup"
+                :listSelected="[...item.groups]"
+                :stageIndex="i"
+                titleCard="Список групп работ"
+                :addList="addListGroup"
+              />
+            </div>
             <div v-if="item.laborVolumes[0]">
               <v-expansion-panels
                 flat
@@ -122,7 +133,7 @@
                   <v-expansion-panel-header >
                     <div class="text-medium" style="display: flex; align-items: center">
                       <div class="text-medium" style="width: 70%">
-                        Объем работ
+                        Работы
                       </div>
                       <v-icon
                         v-if="!sumStageLabor[i].sumLabor"
@@ -193,16 +204,7 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-              <v-divider />
-              <dialog-add-groups
-                class="mt-3 mb-3"
-                title="добавить группы работ"
-                :fullList="listGroup"
-                :listSelected="[...item.groups]"
-                :stageIndex="i"
-                titleCard="Список групп работ"
-                :addList="addListGroup"
-              />
+              <v-divider v-if="item.groups[0]" />
               <v-expansion-panels
                 flat
                 multiple
@@ -244,14 +246,20 @@
                       <template v-slot:default>
                         <thead>
                         <tr>
-                          <th style="width: 65%" class="text-left">Виды работ</th>
+                          <th style="width: 45%" class="text-left">Виды работ</th>
+                          <th style="width: 15%" class="text-left">Язык</th>
                           <th style="width: 30%" class="text-left">Трудоемкость</th>
                           <th class="text-left">Действия</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr v-for="(el, j) in group.listLabor" :key="j">
-                          <td >{{ el.laborName }}</td>
+                          <td>{{ el.laborName }}</td>
+                          <td>
+                            <v-chip small :color="chipСolor[el.devEnvID]">
+                              {{ el.devEnvName }}
+                            </v-chip>
+                          </td>
                           <td>
                             <div style="display: flex; align-items: center">
                               <v-slider
@@ -346,6 +354,12 @@ export default {
       valid: true,
       stages: this.data.nir ? this.data.nir.stages : [],
       modifiedDate: '',
+      chipСolor: {
+        1: 'error',
+        2: 'primary',
+        3: 'success',
+        4: 'warning',
+      },
     };
   },
   computed: {
