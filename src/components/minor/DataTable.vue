@@ -34,6 +34,9 @@
       hide-default-footer
       @page-count="pageCount = $event"
     >
+      <template v-slot:item.name="{ item }">
+        <a :href="`list-nir/edit/${item.id}`">{{item.name}}</a>
+      </template>
       <template v-slot:item.actions="{ item }">
         <div v-if="item.createTime">
           <v-btn :to="`${editLink}/${item.id}`" class="mr-1" icon>
