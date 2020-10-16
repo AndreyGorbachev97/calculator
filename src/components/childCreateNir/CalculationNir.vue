@@ -95,7 +95,7 @@
                 :addList="addListGroup"
               />
             </div>
-            <div v-if="item.laborVolumes[0]">
+            <div>
               <v-expansion-panels
                 flat
                 multiple
@@ -219,7 +219,7 @@
                         {{group.name}}
                       </div>
                       <v-icon
-                        v-if="!item.nirInnovationRateValue"
+                        v-if="!group.listLabor[0]"
                         class="ml-2"
                         color="warning"
                       >
@@ -236,7 +236,13 @@
                         titleCard="Список работ"
                         :addList="addListLaborToGroup"
                       />
-                      <v-btn @click.stop="" class="ma-2" icon x-small color="error">
+                      <v-btn
+                        @click.stop="deleteGroup(i, group.id)"
+                        class="ma-2"
+                        icon
+                        x-small
+                        color="error"
+                      >
                         <v-icon>mdi-delete-outline</v-icon>
                       </v-btn>
                     </div>
@@ -253,7 +259,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="(el, j) in group.listLabor" :key="j">
+                        <tr v-for="(el, q) in group.listLabor" :key="q">
                           <td>{{ el.laborName }}</td>
                           <td>
                             <v-chip small :color="chipСolor[el.devEnvID]">
@@ -288,7 +294,12 @@
                             </div>
                           </td>
                           <td>
-                            <v-btn @click="deleteElementList(i, el.id)" icon x-small color="error">
+                            <v-btn
+                              @click="deleteGroupElementList(i, j, el.id)"
+                              icon
+                              x-small
+                              color="error"
+                            >
                               <v-icon>mdi-delete-outline</v-icon>
                             </v-btn>
                           </td>
@@ -299,16 +310,6 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-            </div>
-            <div
-              v-else
-              class="ma-3 mb-6 inf-block"
-            >
-              <v-icon class="icon-info">mdi-playlist-plus</v-icon>
-              <div class="text-bold" style="display: flex; justify-content: center">
-                Добавьте работы
-              </div>
-
             </div>
           </v-card-text>
         </v-card>
@@ -450,7 +451,6 @@ export default {
           })),
         });
       }
-      this.actions.getNirCurrent(this.data.nirId);
     },
     addStage() {
       const date = new Date();
@@ -463,6 +463,7 @@ export default {
           dateTo: moment(lastDate).format('YYYY-MM-DD'),
           laborVolumes: [],
           nirInnovationRateID: null,
+          groups: [],
           nirInnovationRateValue: 0,
           volume: 0,
         },
@@ -481,9 +482,11 @@ export default {
       this.data.nir.stages.pop();
       if (id) this.actions.deleteStage(id);
     },
-    deleteGroup(indexStage, idGroup) {
-      this.stages[indexStage].groups = this.stages[indexStage].groups
-        .filter((el) => el.id !== idGroup);
+    deleteGroup(stageIndex, groupId) {
+      console.log('stageIndex', stageIndex);
+      console.log('groupId', groupId);
+      this.data.nir.stages[stageIndex].groups = this.data.nir.stages[stageIndex].groups
+        .filter((el) => el.id !== groupId);
     },
     deleteElementList(stageIndex, elementId) {
       console.log(elementId);
@@ -491,6 +494,11 @@ export default {
         .findIndex((el) => el.labor.id === elementId);
       console.log(index);
       this.data.nir.stages[stageIndex].laborVolumes.splice(index, 1);
+    },
+    deleteGroupElementList(stageIndex, groupIndex, elId) {
+      this.data.nir.stages[stageIndex].groups[groupIndex].listLabor = this.data.nir
+        .stages[stageIndex].groups[groupIndex].listLabor
+        .filter((el) => el.id !== elId);
     },
   },
 };
