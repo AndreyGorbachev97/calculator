@@ -483,8 +483,6 @@ export default {
       if (id) this.actions.deleteStage(id);
     },
     deleteGroup(stageIndex, groupId) {
-      console.log('stageIndex', stageIndex);
-      console.log('groupId', groupId);
       this.data.nir.stages[stageIndex].groups = this.data.nir.stages[stageIndex].groups
         .filter((el) => el.id !== groupId);
     },
