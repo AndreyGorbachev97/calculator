@@ -89,7 +89,7 @@
                 class="ml-2 mb-3"
                 title="добавить группы работ"
                 :fullList="listGroup"
-                :listSelected="[...item.groups]"
+                :listSelected="[...item.softwareDevLaborGroups]"
                 :stageIndex="i"
                 titleCard="Список групп работ"
                 :addList="addListGroup"
@@ -204,7 +204,7 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-              <v-divider v-if="item.groups[0]" />
+              <v-divider v-if="item.softwareDevLaborGroups[0]" />
               <v-expansion-panels
                 flat
                 multiple
@@ -212,14 +212,14 @@
                 accordion
                 focusable
               >
-                <v-expansion-panel v-for="(group, j) in item.groups" :key="j">
+                <v-expansion-panel v-for="(group, j) in item.softwareDevLaborGroups" :key="j">
                   <v-expansion-panel-header >
                     <div style="display: flex; align-items: center">
                       <div class="text-medium" style="width: 70%">
                         {{group.name}}
                       </div>
                       <v-icon
-                        v-if="!group.listLabor[0]"
+                        v-if="!group.laborVolumes[0]"
                         class="ml-2"
                         color="warning"
                       >
@@ -230,7 +230,7 @@
                       </div>
                       <v-spacer />
                       <dialog-add-works-from-group
-                        :listSelected="group.listLabor"
+                        :listSelected="group.laborVolumes"
                         :stageIndex="i"
                         :groupIndex="j"
                         titleCard="Список работ"
@@ -259,11 +259,11 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="(el, q) in group.listLabor" :key="q">
-                          <td>{{ el.laborName }}</td>
+                        <tr v-for="(el, q) in group.laborVolumes" :key="q">
+                          <td>{{  el.labor.name }}</td>
                           <td>
-                            <v-chip small :color="chipСolor[el.devEnvID]">
-                              {{ el.devEnvName }}
+                            <v-chip small :color="chipСolor[el.devEnv.id]">
+                              {{ el.devEnv.name }}
                             </v-chip>
                           </td>
                           <td>
@@ -379,8 +379,8 @@ export default {
       return this.data.nir.stages
         .map((stage) => ({
           sumLabor: stage.laborVolumes.reduce((acc, el) => acc + el.volume, 0),
-          sumGroupLabor: stage.groups
-            .map((group) => group.listLabor.reduce((acc, el) => acc + el.volume, 0)),
+          sumGroupLabor: stage.softwareDevLaborGroups
+            .map((group) => group.laborVolumes.reduce((acc, el) => acc + el.volume, 0)),
         }));
     },
     sumGroup() {
@@ -463,7 +463,7 @@ export default {
           dateTo: moment(lastDate).format('YYYY-MM-DD'),
           laborVolumes: [],
           nirInnovationRateID: null,
-          groups: [],
+          softwareDevLaborGroups: [],
           nirInnovationRateValue: 0,
           volume: 0,
         },
@@ -473,17 +473,18 @@ export default {
       this.data.nir.stages[index].laborVolumes = list;
     },
     addListGroup(index, groups) {
-      this.data.nir.stages[index].groups = groups;
+      this.data.nir.stages[index].softwareDevLaborGroups = groups;
     },
     addListLaborToGroup(indexStage, indexGroup, list) {
-      this.data.nir.stages[indexStage].groups[indexGroup].listLabor = list;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup].laborVolumes = list;
     },
     deleteStage(id) {
       this.data.nir.stages.pop();
       if (id) this.actions.deleteStage(id);
     },
     deleteGroup(stageIndex, groupId) {
-      this.data.nir.stages[stageIndex].groups = this.data.nir.stages[stageIndex].groups
+      this.data.nir.stages[stageIndex].softwareDevLaborGroups = this.data
+        .nir.stages[stageIndex].softwareDevLaborGroups
         .filter((el) => el.id !== groupId);
     },
     deleteElementList(stageIndex, elementId) {
@@ -494,8 +495,8 @@ export default {
       this.data.nir.stages[stageIndex].laborVolumes.splice(index, 1);
     },
     deleteGroupElementList(stageIndex, groupIndex, elId) {
-      this.data.nir.stages[stageIndex].groups[groupIndex].listLabor = this.data.nir
-        .stages[stageIndex].groups[groupIndex].listLabor
+      this.data.nir.stages[stageIndex].softwareDevLaborGroups[groupIndex].laborVolumes = this.data
+        .nir.stages[stageIndex].softwareDevLaborGroups[groupIndex].laborVolumes
         .filter((el) => el.id !== elId);
     },
   },

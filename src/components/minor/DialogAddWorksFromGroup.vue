@@ -51,7 +51,7 @@
             class="data-table"
             v-model="localListSelected"
             :headers="headers"
-            :items="laborList"
+            :items="laborVolumes"
             :page.sync="page"
             @page-count="pageCount = $event"
             :items-per-page="itemsPerPage"
@@ -60,13 +60,16 @@
             item-key="id"
             show-select
           >
+            <template v-slot:item.laborName="{ item }">
+              {{ item.labor.name }}
+            </template>
             <template v-slot:item.devEnvName="{ item }">
               <v-chip
                 small
-                :color="chipСolor[item.devEnvID]"
+                :color="chipСolor[item.devEnv.id]"
                 dark
               >
-                {{ item.devEnvName }}
+                {{ item.devEnv.name }}
               </v-chip>
             </template>
           </v-data-table>
@@ -113,7 +116,7 @@ export default {
       dialog: false,
       items: [],
       software: {},
-      laborList: [],
+      laborVolumes: [],
       localListSelected: this.listSelected,
       chipСolor: {
         1: 'error',
@@ -153,7 +156,7 @@ export default {
   methods: {
     ...mapActions(['GET_NIR_GROUP_LABOR_LIST', 'GET_SOFTWARE_LIST', 'GET_SOFTWARE_LABOR_LIST']),
     filterLabor(id) {
-      return this.laborList.filter((labor) => labor.devEnvID === id);
+      return this.laborVolumes.filter((labor) => labor.devEnvID === id);
     },
     changePage(newPage) {
       if (newPage >= 0 && newPage <= this.pageCount - 1) {
@@ -165,7 +168,7 @@ export default {
       const temp = this.SOFTWARE_LIST[0];
       this.software = temp;
       await this.GET_SOFTWARE_LABOR_LIST();
-      this.laborList = this.SOFTWARE_LABOR_LIST;
+      this.laborVolumes = this.SOFTWARE_LABOR_LIST;
     },
     saveList() {
       this.addList(this.stageIndex, this.groupIndex, this.localListSelected.map((el) => ({

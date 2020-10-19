@@ -136,7 +136,7 @@ export default {
         if (this.listSelected.find((l) => l.id === el.id)) {
           acc.push(this.listSelected.find((l) => l.id === el.id));
         } else {
-          acc.push({ ...el, listLabor: [] });
+          acc.push({ ...el, laborVolumes: [] });
         }
         return acc;
       }, []);
