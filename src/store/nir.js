@@ -29,7 +29,6 @@ export default {
         ...stage,
         dateFrom: moment(stage.dateFrom).format('YYYY-MM-DD'),
         dateTo: moment(stage.dateTo).format('YYYY-MM-DD'),
-        groups: [],
         laborVolumes: stage.laborVolumes.map((el) => ({
           ...el,
           labor: {
@@ -37,6 +36,16 @@ export default {
             step: (el.labor.maxVolume - el.labor.minVolume) / 10,
             overMax: el.labor.maxVolume + (((el.labor.maxVolume - el.labor.minVolume) / 10) * 3),
           },
+        })),
+        softwareDevLaborGroups: stage.softwareDevLaborGroups.map((group) => ({
+          ...group,
+          laborVolumes: group.laborVolumes.map((labor) => ({
+            ...labor.laborVolumeRange,
+            step: (labor.laborVolumeRange.maxVolume - labor.laborVolumeRange.minVolume) / 10,
+            overMax: labor.laborVolumeRange.maxVolume
+            + (((labor.laborVolumeRange.maxVolume - labor.laborVolumeRange.minVolume) / 10) * 3),
+            volume: labor.volume,
+          })),
         })),
       })) : [];
       if (nir.stages[0]) {
