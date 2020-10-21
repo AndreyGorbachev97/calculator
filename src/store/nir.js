@@ -25,7 +25,7 @@ export default {
       }));
     },
     SET_NIR_CURRENT: (state, nir) => {
-      const modStages = nir.stages ? nir.stages.map((stage) => ({
+      const modStages = nir.stages[0] ? nir.stages.map((stage) => ({
         ...stage,
         dateFrom: moment(stage.dateFrom).format('YYYY-MM-DD'),
         dateTo: moment(stage.dateTo).format('YYYY-MM-DD'),
@@ -39,6 +39,8 @@ export default {
         })),
         softwareDevLaborGroups: stage.softwareDevLaborGroups.map((group) => ({
           ...group,
+          name: group.softwareDevLaborGroupName,
+          code: group.softwareDevLaborGroupCode,
           laborVolumes: group.laborVolumes.map((labor) => ({
             ...labor.laborVolumeRange,
             step: (labor.laborVolumeRange.maxVolume - labor.laborVolumeRange.minVolume) / 10,
@@ -57,7 +59,7 @@ export default {
         const stages = [{
           dateFrom: firstDate.toISOString().substr(0, 10),
           dateTo: moment(lastDate).format('YYYY-MM-DD'),
-          groups: [],
+          softwareDevLaborGroups: [],
           laborVolumes: [],
           nirInnovationRateID: null,
           nirInnovationRateValue: 0,

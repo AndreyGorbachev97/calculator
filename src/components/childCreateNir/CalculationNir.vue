@@ -328,7 +328,6 @@
 
 <script>
 import moment from 'moment';
-import _ from 'lodash';
 import DialogAddWorks from '../minor/DialogAddWorks.vue';
 import DialogAddGroups from '../minor/DialogAddGroups.vue';
 import DialogAddWorksFromGroup from '../minor/DialogAddWorksFromGroup.vue';
@@ -446,7 +445,7 @@ export default {
           })),
           ontdLaborVolumes: [],
           softwareDevLaborGroups: payload.softwareDevLaborGroups.map((el) => ({
-            softwareDevLaborGroupID: el.softwareDevLaborGroupID,
+            softwareDevLaborGroupID: el.softwareDevLaborGroupID || el.id,
             solutionInnovationRateID: 1,
             solutionInnovationRateValue: 1.1,
             standardModulesUsingRateID: 1,
@@ -477,23 +476,20 @@ export default {
           })),
           softwareDevLaborGroups: payload.softwareDevLaborGroups.map((el) => ({
             softwareDevLaborGroupID: el.id,
-            solutionInnovationRateID: 0,
-            solutionInnovationRateValue: 0,
-            standardModulesUsingRateID: 0,
-            standardModulesUsingRateValue: 0,
-            infrastructureComplexityRateID: 0,
-            infrastructureComplexityRateValue: 0,
-            testsDevelopmentRateID: 0,
-            testsDevelopmentRateValue: 0,
-            architectureComplexityRateID: 0,
-            architectureComplexityRateValue: 0,
-            id: 0,
-            softwareDevLaborGroupName: el.name,
-            laborVolumes: el.laborVolumes.map((labor) => {
-              const res = _.omit(labor, ['step', 'overMax', 'stageIndex']);
-              console.log('res', res);
-              return res;
-            }),
+            solutionInnovationRateID: 1,
+            solutionInnovationRateValue: 1.1,
+            standardModulesUsingRateID: 1,
+            standardModulesUsingRateValue: 0.7,
+            infrastructureComplexityRateID: 1,
+            infrastructureComplexityRateValue: 1.6,
+            testsDevelopmentRateID: 1,
+            testsDevelopmentRateValue: 1.05,
+            architectureComplexityRateID: 1,
+            architectureComplexityRateValue: 1.1,
+            laborVolumes: el.laborVolumes.map((labor) => ({
+              volume: labor.volume,
+              laborVolumeRangeID: labor.id,
+            })),
           })),
         });
       }
