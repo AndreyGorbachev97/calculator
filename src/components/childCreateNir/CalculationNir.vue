@@ -133,7 +133,7 @@
                   <v-expansion-panel-header >
                     <div class="text-medium" style="display: flex; align-items: center">
                       <div class="text-medium" style="width: 70%">
-                        Работы
+                        Трудозатраты
                       </div>
                       <v-icon
                         v-if="!sumStageLabor[i].sumLabor"
@@ -236,6 +236,7 @@
                         titleCard="Список работ"
                         :addList="addListLaborToGroup"
                       />
+                      <dialog-settings-group class="ml-2"/>
                       <v-btn
                         @click.stop="deleteGroup(i, group.id)"
                         class="ma-2"
@@ -333,6 +334,7 @@ import DialogAddGroups from '../minor/DialogAddGroups.vue';
 import DialogAddWorksFromGroup from '../minor/DialogAddWorksFromGroup.vue';
 import NoveltyRate from './NoveltyRate.vue';
 import DateInput from '../minor/DateInput.vue';
+import DialogSettingsGroup from '../minor/DialogSettingsGroup.vue';
 import { sortListInnovationRate, compare } from '../../utils/helpers';
 
 export default {
@@ -349,6 +351,7 @@ export default {
     DateInput,
     DialogAddGroups,
     DialogAddWorksFromGroup,
+    DialogSettingsGroup,
   },
   data() {
     return {
