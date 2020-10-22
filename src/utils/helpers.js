@@ -19,14 +19,18 @@ export const sortListInnovationRate = (list) => [...list]
   });
 
 export const minStagesData = (stages) => stages.map((stage) => ({
-  id: stage.id,
   volume: stage.volume.toFixed(4),
   dateFrom: stage.dateFrom,
   dateTo: stage.dateTo,
   nirInnovationRateID: stage.nirInnovationRateID,
   labors: stage.laborVolumes.map((labor) => ({
-    id: labor.id,
+    // id: labor.id,
     volume: labor.volume.toFixed(4),
+  })),
+  groups: stage.softwareDevLaborGroups.map((group) => ({
+    labors: group.laborVolumes.map((labor) => ({
+      volume: labor.volume.toFixed(4),
+    })),
   })),
 }));
 

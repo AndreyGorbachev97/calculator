@@ -18,13 +18,13 @@ export default {
       console.log('stage', stage);
       const modStage = {
         ...stage,
-        dateFrom: moment(stage.dateFrom).format('YYYY-DD-MM'),
+        dateFrom: moment(stage.dateFrom).format('YYYY-MM-DD'),
         dateTo: moment(stage.dateTo).format('YYYY-MM-DD'),
       };
-      console.log(modStage);
+      console.log('list', state.stageList);
       console.log(index);
       if (index >= 0) {
-        stage.stageList.splice(index, 1, modStage);
+        state.stageList.splice(index, 1, modStage);
       }
     },
     SET_ADD_NIR_STAGE: (state, stage) => {
