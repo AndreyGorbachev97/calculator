@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Pagination from './Pagination.vue';
 
 export default {
@@ -117,6 +118,13 @@ export default {
   components: {
     Pagination,
   },
+  computed: mapGetters([
+    'ARCHITECTURE_COMPLEXITY_LIST',
+    'INFRASTRUCTURE_COMPLEXITY_LIST',
+    'SOLUTION_INNOVATION_LIST',
+    'STANDARD_MODULES_USING_LIST',
+    'TESTS_DEVELOPMENT_LIST',
+  ]),
   methods: {
     openDialog() {
       this.localListSelected = this.listSelected;
@@ -136,7 +144,20 @@ export default {
         if (this.listSelected.find((l) => l.id === el.id)) {
           acc.push(this.listSelected.find((l) => l.id === el.id));
         } else {
-          acc.push({ ...el, laborVolumes: [] });
+          acc.push({
+            ...el,
+            solutionInnovationRateID: this.SOLUTION_INNOVATION_LIST[0].id,
+            solutionInnovationRateValue: this.SOLUTION_INNOVATION_LIST[0].value,
+            standardModulesUsingRateID: this.STANDARD_MODULES_USING_LIST[0].id,
+            standardModulesUsingRateValue: this.STANDARD_MODULES_USING_LIST[0].value,
+            infrastructureComplexityRateID: this.INFRASTRUCTURE_COMPLEXITY_LIST[0].id,
+            infrastructureComplexityRateValue: this.INFRASTRUCTURE_COMPLEXITY_LIST[0].value,
+            testsDevelopmentRateID: this.TESTS_DEVELOPMENT_LIST[0].id,
+            testsDevelopmentRateValue: this.TESTS_DEVELOPMENT_LIST[0].value,
+            architectureComplexityRateID: this.ARCHITECTURE_COMPLEXITY_LIST[0].id,
+            architectureComplexityRateValue: this.ARCHITECTURE_COMPLEXITY_LIST[0].value,
+            laborVolumes: [],
+          });
         }
         return acc;
       }, []);

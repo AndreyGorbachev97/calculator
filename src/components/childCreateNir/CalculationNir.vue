@@ -236,7 +236,17 @@
                         titleCard="Список работ"
                         :addList="addListLaborToGroup"
                       />
-                      <dialog-settings-group class="ml-2"/>
+                      <dialog-settings-group
+                        class="ml-2"
+                        :architectureComplexityRateID="group.architectureComplexityRateID"
+                        :infrastructureComplexityRateID="group.infrastructureComplexityRateID"
+                        :standardModulesUsingRateID="group.standardModulesUsingRateID"
+                        :testsDevelopmentRateID="group.testsDevelopmentRateID"
+                        :solutionInnovationRateID="group.solutionInnovationRateID"
+                        :indexStage="i"
+                        :indexGroup="j"
+                        :addSettingsGroup="addSettingsGroup"
+                      />
                       <v-btn
                         @click.stop="deleteGroup(i, group.id)"
                         class="ma-2"
@@ -448,17 +458,8 @@ export default {
           })),
           ontdLaborVolumes: [],
           softwareDevLaborGroups: payload.softwareDevLaborGroups.map((el) => ({
+            ...el,
             softwareDevLaborGroupID: el.softwareDevLaborGroupID || el.id,
-            solutionInnovationRateID: 1,
-            solutionInnovationRateValue: 1.1,
-            standardModulesUsingRateID: 1,
-            standardModulesUsingRateValue: 0.7,
-            infrastructureComplexityRateID: 1,
-            infrastructureComplexityRateValue: 1.6,
-            testsDevelopmentRateID: 1,
-            testsDevelopmentRateValue: 1.05,
-            architectureComplexityRateID: 1,
-            architectureComplexityRateValue: 1.1,
             laborVolumes: el.laborVolumes.map((labor) => ({
               volume: labor.volume,
               laborVolumeRangeID: labor.id,
@@ -478,17 +479,8 @@ export default {
             volume: el.volume,
           })),
           softwareDevLaborGroups: payload.softwareDevLaborGroups.map((el) => ({
+            ...el,
             softwareDevLaborGroupID: el.id,
-            solutionInnovationRateID: 1,
-            solutionInnovationRateValue: 1.1,
-            standardModulesUsingRateID: 1,
-            standardModulesUsingRateValue: 0.7,
-            infrastructureComplexityRateID: 1,
-            infrastructureComplexityRateValue: 1.6,
-            testsDevelopmentRateID: 1,
-            testsDevelopmentRateValue: 1.05,
-            architectureComplexityRateID: 1,
-            architectureComplexityRateValue: 1.1,
             laborVolumes: el.laborVolumes.map((labor) => ({
               volume: labor.volume,
               laborVolumeRangeID: labor.id,
@@ -513,6 +505,13 @@ export default {
           volume: 0,
         },
       ];
+    },
+    addSettingsGroup(indexStage, indexGroup, obj) {
+      console.log('obj', obj);
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup] = {
+        ...this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup],
+        ...obj,
+      };
     },
     addListLabor(index, list) {
       this.data.nir.stages[index].laborVolumes = list;

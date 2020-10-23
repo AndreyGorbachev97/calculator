@@ -17,7 +17,7 @@
       max-width="900"
     >
       <v-card>
-        <v-card-title></v-card-title>
+        <v-card-title>Настройка коэффициентов группы</v-card-title>
         <v-card-text>
           <v-autocomplete
             v-model="architectureComplexityRate"
@@ -138,6 +138,45 @@
               </v-row>
             </template>
           </v-autocomplete>
+
+          <v-autocomplete
+            v-model="testsDevelopmentRate"
+            :items="TESTS_DEVELOPMENT_LIST"
+            label="Уровень тестирования"
+            :item-text="(obj) => obj.testsCoverageLevelName"
+            :item-value="(obj) => obj"
+          >
+            <template v-slot:selection="data">
+              <div class="list-item">
+                {{data.item.testsCoverageLevelName}}
+                <span>
+                  <v-chip class="ml-2" small color="primary">{{data.item.value}}</v-chip>
+                </span>
+              </div>
+            </template>
+             <template v-slot:item="data">
+              <v-row style="width: 600px">
+                <v-col cols="3">
+                  {{data.item.componentsMicroArchitectureName}}
+                </v-col>
+                <v-col cols="3">
+                   <v-chip
+                    class="ml-2"
+                    small
+                    :color="chipСolor[data.item.testsScaleID]"
+                  >
+                    {{data.item.testsScaleName}}
+                  </v-chip>
+                </v-col>
+                <v-col cols="3">
+                  {{data.item.testsCoverageLevelName}}
+                </v-col>
+                <v-col cols="3">
+                  {{data.item.value}}
+                </v-col>
+              </v-row>
+            </template>
+          </v-autocomplete>
         </v-card-text>
 
         <v-card-actions>
@@ -145,7 +184,7 @@
           <v-btn
             color="primary"
             text
-            @click.stop=""
+            @click.stop="save"
           >
             Далее
           </v-btn>
@@ -167,6 +206,21 @@ import { mapGetters } from 'vuex';
 
 export default {
   name: 'DialogSettingsGroup',
+  props: {
+    architectureComplexityRateID: Number,
+    infrastructureComplexityRateID: Number,
+    standardModulesUsingRateID: Number,
+    testsDevelopmentRateID: Number,
+    solutionInnovationRateID: Number,
+    indexStage: Number,
+    indexGroup: Number,
+    addSettingsGroup: Function,
+  },
+  watch: {
+    architectureComplexityRateID() {
+      console.log('update architecture');
+    },
+  },
   data() {
     return {
       dialog: false,
@@ -193,7 +247,33 @@ export default {
     ]),
   },
   methods: {
+    save() {
+      console.log('test');
+      this.addSettingsGroup(this.indexStage, this.indexGroup, {
+        architectureComplexityRateID: this.architectureComplexityRate.id,
+        architectureComplexityRateValue: this.architectureComplexityRate.value,
+        infrastructureComplexityRateID: this.infrastructureComplexityRate.id,
+        infrastructureComplexityRateValue: this.infrastructureComplexityRate.value,
+        solutionInnovationRateID: this.solutionInnovationRate.id,
+        solutionInnovationRateValue: this.solutionInnovationRate.value,
+        standardModulesUsingRateID: this.standardModulesUsingRate.id,
+        standardModulesUsingRateValue: this.standardModulesUsingRate.value,
+        testsDevelopmentRateID: this.testsDevelopmentRate.id,
+        testsDevelopmentRateValue: this.testsDevelopmentRate.value,
+      });
+      this.dialog = false;
+    },
     openDialog() {
+      this.architectureComplexityRate = this.ARCHITECTURE_COMPLEXITY_LIST
+        .find((el) => el.id === this.architectureComplexityRateID);
+      this.infrastructureComplexityRate = this.INFRASTRUCTURE_COMPLEXITY_LIST
+        .find((el) => el.id === this.infrastructureComplexityRateID);
+      this.solutionInnovationRate = this.SOLUTION_INNOVATION_LIST
+        .find((el) => el.id === this.solutionInnovationRateID);
+      this.standardModulesUsingRate = this.STANDARD_MODULES_USING_LIST
+        .find((el) => el.id === this.standardModulesUsingRateID);
+      this.testsDevelopmentRate = this.TESTS_DEVELOPMENT_LIST
+        .find((el) => el.id === this.testsDevelopmentRateID);
       this.dialog = true;
     },
   },
