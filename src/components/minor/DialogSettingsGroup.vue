@@ -17,12 +17,23 @@
       max-width="900"
     >
       <v-card>
-        <v-card-title>Настройка коэффициентов группы</v-card-title>
+        <v-card-title>
+          Настройка коэффициентов группы
+           <v-spacer />
+            <v-chip class="ml-3" outlined color="success">
+            <v-avatar left>
+              <v-icon>mdi-cash-multiple</v-icon>
+            </v-avatar>
+            {{`${architectureComplexityRate.value} x ${infrastructureComplexityRate.value} x
+            ${solutionInnovationRate.value} x ${standardModulesUsingRate.value} x
+            ${testsDevelopmentRate.value} = ${volume.toFixed(3)}`}}
+          </v-chip>
+        </v-card-title>
         <v-card-text>
           <v-autocomplete
             v-model="architectureComplexityRate"
             :items="ARCHITECTURE_COMPLEXITY_LIST"
-            label="Уровень сложности архитектуры"
+            label="Сложность разработки под программную архитектуру решения"
             :item-text="(obj) =>
             `${obj.componentsInteractionArchitectureName} ${obj.componentsMakroArchitectureName}`"
             :item-value="(obj) => obj"
@@ -61,7 +72,7 @@
           <v-autocomplete
             v-model="infrastructureComplexityRate"
             :items="INFRASTRUCTURE_COMPLEXITY_LIST"
-            label="Уровень сложности инфраструктуры"
+            label="Сложность инфраструктуры разработки и функционирования"
             :item-text="(obj) => obj.name"
             :item-value="(obj) => obj"
           >
@@ -88,7 +99,7 @@
           <v-autocomplete
             v-model="solutionInnovationRate"
             :items="SOLUTION_INNOVATION_LIST"
-            label="Уровень инновационных решений"
+            label="Новизна решения"
             :item-text="(obj) => obj.name"
             :item-value="(obj) => obj"
           >
@@ -115,7 +126,7 @@
           <v-autocomplete
             v-model="standardModulesUsingRate"
             :items="STANDARD_MODULES_USING_LIST"
-            label="Уровень использования стандартных модулей"
+            label="Степень использования стандартных модулей"
             :item-text="(obj) => obj.name"
             :item-value="(obj) => obj"
           >
@@ -142,7 +153,7 @@
           <v-autocomplete
             v-model="testsDevelopmentRate"
             :items="TESTS_DEVELOPMENT_LIST"
-            label="Уровень тестирования"
+            label="Сложность разработки программных тестов и тестопригодного кода"
             :item-text="(obj) => obj.testsCoverageLevelName"
             :item-value="(obj) => obj"
           >
@@ -215,6 +226,7 @@ export default {
     indexStage: Number,
     indexGroup: Number,
     addSettingsGroup: Function,
+    addCoefficient: Function,
   },
   watch: {
     architectureComplexityRateID() {
@@ -245,10 +257,16 @@ export default {
       'STANDARD_MODULES_USING_LIST',
       'TESTS_DEVELOPMENT_LIST',
     ]),
+    volume() {
+      return this.architectureComplexityRate.value
+      * this.infrastructureComplexityRate.value
+      * this.solutionInnovationRate.value
+      * this.standardModulesUsingRate.value
+      * this.testsDevelopmentRate.value;
+    },
   },
   methods: {
     save() {
-      console.log('test');
       this.addSettingsGroup(this.indexStage, this.indexGroup, {
         architectureComplexityRateID: this.architectureComplexityRate.id,
         architectureComplexityRateValue: this.architectureComplexityRate.value,
@@ -261,6 +279,7 @@ export default {
         testsDevelopmentRateID: this.testsDevelopmentRate.id,
         testsDevelopmentRateValue: this.testsDevelopmentRate.value,
       });
+      this.addCoefficient(this.indexStage, this.indexGroup, this.volume);
       this.dialog = false;
     },
     openDialog() {

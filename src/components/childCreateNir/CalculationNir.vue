@@ -227,6 +227,8 @@
                       </v-icon>
                       <div v-else class="text-medium ml-2">
                         {{sumStageLabor[i].sumGroupLabor[j].toFixed(3)}}
+                        {{data.nir.stages[i]
+                        .softwareDevLaborGroups[j].architectureComplexityRateValue}}
                       </div>
                       <v-spacer />
                       <dialog-add-works-from-group
@@ -246,6 +248,7 @@
                         :indexStage="i"
                         :indexGroup="j"
                         :addSettingsGroup="addSettingsGroup"
+                        :addCoefficient="addCoefficient"
                       />
                       <v-btn
                         @click.stop="deleteGroup(i, group.id)"
@@ -389,11 +392,19 @@ export default {
       return sortListInnovationRate(this.data.listNirInnovationRate);
     },
     sumStageLabor() {
+      console.log('test');
       return this.data.nir.stages
         .map((stage) => ({
           sumLabor: stage.laborVolumes.reduce((acc, el) => acc + el.volume, 0),
           sumGroupLabor: stage.softwareDevLaborGroups
-            .map((group) => group.laborVolumes.reduce((acc, el) => acc + el.volume, 0)),
+            .map((group) => {
+              const coefficient = group.architectureComplexityRateValue
+              * group.infrastructureComplexityRateValue
+              * group.solutionInnovationRateValue
+              * group.standardModulesUsingRateValue
+              * group.testsDevelopmentRateValue;
+              return coefficient * group.laborVolumes.reduce((acc, el) => acc + el.volume, 0);
+            }),
         }));
     },
     sumGroup() {
@@ -434,12 +445,6 @@ export default {
     colorSlider(maxValue, value) {
       return value > maxValue ? 'error' : 'primary';
     },
-    // listSelectedGroup(list) {
-    //   return list.map((list) => ({
-    //     id: list.softwareDevLaborGroupID,
-    //     name: list.name,
-    //   }));
-    // },
     async saveStage(payload, index) {
       if (payload.id) {
         await this.actions.saveStage({
@@ -506,12 +511,29 @@ export default {
         },
       ];
     },
+    addCoefficient(indexStage, indexGroup, сoefficient) {
+      this.sumStageLabor[indexStage].sumGroupLabor[indexGroup] = this.sumStageLabor[indexStage]
+        .sumGroupLabor[indexGroup] * сoefficient;
+    },
     addSettingsGroup(indexStage, indexGroup, obj) {
-      console.log('obj', obj);
-      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup] = {
-        ...this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup],
-        ...obj,
-      };
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .architectureComplexityRateValue = obj.architectureComplexityRateValue;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .infrastructureComplexityRateID = obj.infrastructureComplexityRateID;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .infrastructureComplexityRateValue = obj.infrastructureComplexityRateValue;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .solutionInnovationRateID = obj.solutionInnovationRateID;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .solutionInnovationRateValue = obj.solutionInnovationRateValue;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .standardModulesUsingRateID = obj.standardModulesUsingRateID;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .standardModulesUsingRateValue = obj.standardModulesUsingRateValue;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .testsDevelopmentRateID = obj.testsDevelopmentRateID;
+      this.data.nir.stages[indexStage].softwareDevLaborGroups[indexGroup]
+        .testsDevelopmentRateValue = obj.testsDevelopmentRateValue;
     },
     addListLabor(index, list) {
       this.data.nir.stages[index].laborVolumes = list;
